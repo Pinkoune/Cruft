@@ -1,0 +1,20 @@
+[package]
+name = "cruft_ui"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+bevy = { workspace = true, features = ["3d", "bevy_winit", "default_font", "png"] }
+bevy_egui = "0.43.1"
+egui_dock = "0.21"
+ron.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json = "1"
+cruft_core.workspace = true
+cruft_scene.workspace = true
+
+[lints]
+workspace = true
+

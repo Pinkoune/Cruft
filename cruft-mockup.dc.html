@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cruft — Éditeur principal</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&amp;family=Fira+Mono:wght@400;500&amp;family=Alfa+Slab+One&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#090D10}
+a{color:#7FC4E0}a:hover{color:#BFE3F2}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+.mono{font-family:'Fira Mono',monospace}
+.cap{font-family:'Fira Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#A3B0B6}
+.ib{display:inline-flex;align-items:center;justify-content:center;height:24px;min-width:24px;padding:0 7px;border-radius:6px;color:#BCC7CC;font-size:11.5px;transition:background .12s,color .12s}
+.ib:hover{background:#243035;color:#FFFFFF}
+.ib:active{background:#36444A}
+.ib.on{background:#4299BF;color:#0B1418}
+.seg{display:inline-flex;padding:2px;gap:1px;border-radius:7px;background:#0B1013;border:1px solid #243035}
+.menu{height:24px;padding:0 8px;border-radius:6px;font-size:12px;color:#BCC7CC;transition:background .12s}
+.menu:hover{background:#26323A;color:#FFF}
+.play{display:inline-flex;align-items:center;justify-content:center;width:30px;height:24px;border-radius:6px;color:#BCC7CC;transition:background .12s,color .12s}
+.play:hover{background:#243035;color:#FFF}
+.play.on{background:#0B7261;color:#FFFFFF;box-shadow:0 0 0 3px rgba(63,191,159,.22)}
+.tab{height:28px;padding:0 12px;font-size:11.5px;font-weight:500;color:#A3B0B6;border-right:1px solid #243035;background:#0F1518;transition:color .12s,background .12s}
+.tab:hover{color:#E8ECEE;background:#141B1F}
+.tab.on{color:#E8ECEE;background:#141B1F;box-shadow:inset 0 -2px 0 #4299BF}
+.orow{display:flex;align-items:center;height:24px;padding-right:4px;font-size:12px;color:#D3DADD;transition:background .1s}
+.orow:hover{background:#1A2327}
+.orow:hover .eye{opacity:1}
+.orow.sel{background:#1E3A48;color:#FFFFFF}
+.orow.sel .eye{opacity:1}
+.orow.hid .nm{color:#8E9CA3;text-decoration:line-through}
+.orow.ghost{background:repeating-linear-gradient(135deg,rgba(255,200,50,.07) 0 6px,transparent 6px 12px);color:#FFD970}
+.d0{padding-left:8px}.d1{padding-left:24px}.d2{padding-left:40px}
+.pick{flex:1;min-width:0;display:flex;align-items:center;gap:7px;height:100%;text-align:left}
+.eye{opacity:0;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;color:#A3B0B6;transition:opacity .12s,background .12s}
+.eye:hover{background:#36444A;color:#FFF}
+.eye.off{opacity:1;color:#8E9CA3}
+.num{flex:1;min-width:0;height:22px;display:flex;align-items:center;gap:6px;padding:0 7px;border-radius:6px;background:#0B1013;border:1px solid #243035;font-family:'Fira Mono',monospace;font-size:11px;color:#E8ECEE;cursor:ew-resize;transition:border-color .12s,background .12s}
+.num:hover{border-color:#4B5B63;background:#0E1316}
+.tick{width:2px;height:12px;border-radius:1px;flex:none}
+.tx{background:#E0567A}.ty{background:#3FBF9F}.tz{background:#4299BF}
+.comp{border-top:1px solid #243035}
+.chead{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;width:100%;text-align:left;font-size:12px;font-weight:600;color:#E8ECEE;transition:background .12s}
+.chead:hover{background:#1B2428}
+.sw{width:26px;height:14px;border-radius:7px;background:#3E4C53;position:relative;flex:none;transition:background .15s}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:5px;background:#E8ECEE;transition:left .15s}
+.sw.on{background:#4299BF}.sw.on::after{left:14px;background:#0B1418}
+.tile{display:flex;flex-direction:column;gap:5px;width:88px;padding:5px;border-radius:7px;text-align:left;border:1px solid transparent;transition:background .12s,border-color .12s}
+.tile:hover{background:#1B2428;border-color:#36444A}
+.btn{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:6px;font-size:11.5px;font-weight:500;border:1px solid #36444A;background:#1B2428;color:#E8ECEE;transition:background .12s,border-color .12s,transform .06s}
+.btn:hover{background:#243035;border-color:#4B5B63}
+.btn:active{transform:translateY(1px)}
+.btn.pri{background:#FFC832;border-color:#FFC832;color:#1E1600}
+.btn.danger{color:#F08AA5}.btn.danger:hover{background:#3A1520;border-color:#A72145;color:#FFC2D2}
+.btn.pri:hover{background:#FFD65C}
+kbd{font-family:'Fira Mono',monospace;font-size:10px;padding:1px 4px;border-radius:4px;border:1px solid #3E4C53;color:#A3B0B6;background:#0B1013}
+.cmd{display:flex;align-items:center;gap:10px;height:32px;padding:0 12px;width:100%;text-align:left;font-size:12.5px;color:#D3DADD;border-radius:6px}
+.cmd:hover{background:#243035;color:#FFF}
+.cmd.first{background:#1E3A48;color:#FFF}
+@keyframes rise{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+.toast{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);animation:rise .22s ease-out}
+@keyframes drop{from{opacity:0;transform:translateY(-6px) scale(.985)}to{opacity:1;transform:none}}
+.pal{animation:drop .16s ease-out}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.live{animation:blink 1.4s ease-in-out infinite}
+@keyframes dash{to{stroke-dashoffset:-18}}
+.ghostline{animation:dash 1.2s linear infinite}
+.st-ok,.st-applied{font-size:10.5px;color:#3FBF9F}.st-pending{font-size:10.5px;color:#FFC832}.st-rejected{font-size:10.5px;color:#E0567A}
+.lv-warn{color:#FFC832}.lv-mcp{color:#FFD970}.lv-info{color:#7FC4E0}
+.vpp{transition:border-color .25s,box-shadow .25s}
+.vpp.playing{border-color:#3FBF9F !important;box-shadow:0 0 0 2px #3FBF9F,0 0 22px rgba(63,191,159,.35) !important;animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 2px #3FBF9F,0 0 14px rgba(63,191,159,.25)}50%{box-shadow:0 0 0 2px #3FBF9F,0 0 28px rgba(63,191,159,.45)}}
+:focus-visible{outline:2px solid #4299BF;outline-offset:1px}
+[data-tip]{position:relative}
+[data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;padding:3px 7px;border-radius:5px;background:#E8ECEE;color:#0B1418;font-family:'Fira Sans',sans-serif;font-size:11px;font-weight:500;z-index:5;pointer-events:none;animation:tipIn .12s ease-out}
+@keyframes tipIn{from{opacity:0;transform:translate(-50%,-3px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes flash{0%{background:#2A5A70}100%{background:#1E3A48}}
+.orow.sel{animation:flash .45s ease-out}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .3s ease-out}
+.num:active{border-color:#4299BF;background:#10202A}
+.tile:active{transform:scale(.97)}
+.chead:active{background:#1E3A48}
+.scroll::-webkit-scrollbar{width:8px;height:8px}.st-ok,.st-applied{font-size:10.5px;color:#3FBF9F}.st-pending{font-size:10.5px;color:#FFC832}.st-rejected{font-size:10.5px;color:#E0567A}
+.lv-warn{color:#FFC832}.lv-mcp{color:#FFD970}.lv-info{color:#7FC4E0}
+.scroll::-webkit-scrollbar-thumb{background:#34424A;border-radius:0}
+</style>
+</helmet>
+
+<div style="position: relative; min-height: 900px; display: flex; flex-direction: column; background: #090D10; border-radius: 0; color: #E8ECEE; font-family: 'Fira Sans', system-ui, sans-serif; font-size: 12px">
+
+  <!-- Barre de titre -->
+  <header style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; height: auto; min-height: 38px; padding: 0 8px; background: #0F1518; border-bottom: 1px solid #243035">
+    <div style="display: flex; align-items: center; gap: 8px; padding-right: 8px; border-right: 1px solid #243035; height: 26px">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18l-3 4H8l-1 3h6v3H5l2-6H3z" fill="#C8344F"></path><rect x="9" y="4" width="6" height="3" fill="#E8ECEE"></rect></svg>
+      <span style="font-family: 'Alfa Slab One', serif; font-size: 15px; letter-spacing: .05em; color: #E8ECEE">CRUFT</span>
+    </div>
+    <nav style="display: flex; gap: 1px" aria-label="Menu principal">
+      <button class="menu">Fichier</button><button class="menu">Édition</button><button class="menu">Créer</button><button class="menu">Scène</button><button class="menu">Agent</button><button class="menu">Fenêtre</button>
+    </nav>
+    <span class="mono" style="font-size: 11px; color: #A3B0B6">arena_01.scene<span style="color: #E0567A"> ●</span></span>
+    <div style="flex: 1"></div>
+    <div class="seg" aria-label="Transport">
+      <button class="{{ playCls }}" onClick="{{ togglePlay }}" aria-label="Play / Stop" data-tip="Play / Stop  Ctrl P">
+        <sc-if value="{{ playing }}" hint-placeholder-val="{{ false }}"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><rect width="10" height="10" rx="1"></rect></svg></sc-if>
+        <sc-if value="{{ notPlaying }}" hint-placeholder-val="{{ true }}"><svg width="10" height="11" viewBox="0 0 10 11" fill="currentColor" aria-hidden="true"><path d="M0 0v11l10-5.5z"></path></svg></sc-if>
+      </button>
+      <button class="play" aria-label="Pause"><svg width="10" height="11" viewBox="0 0 10 11" fill="currentColor" aria-hidden="true"><rect width="3.5" height="11"></rect><rect x="6.5" width="3.5" height="11"></rect></svg></button>
+      <button class="play" aria-label="Image suivante"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor" aria-hidden="true"><path d="M0 0v11l7-5.5z"></path><rect x="8" width="3" height="11"></rect></svg></button>
+    </div>
+    <div style="flex: 1"></div>
+    <button onClick="{{ openPalette }}" style="display: flex; align-items: center; gap: 10px; height: 26px; padding: 0 8px; width: 260px; border-radius: 6px; background: #090D10; border: 1px solid #243035; color: #A3B0B6; font-size: 11.5px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+      <span style="flex: 1; text-align: left">Commande, entité ou demande à l'agent</span><kbd>Ctrl K</kbd>
+    </button>
+    <div style="display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px; border-radius: 6px; border: 1px solid #4D4020; background: #221E12; font-size: 11px; color: #FFD970" class="mono">
+      <span class="live" style="width: 6px; height: 6px; border-radius: 6px; background: #FFC832"></span>claude-code
+    </div>
+  </header>
+
+  <!-- Espace de travail -->
+  <div style="flex: 1; display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; background: #090D10; min-height: 0">
+
+    <!-- Colonne gauche + centre -->
+    <div style="flex: 999 1 820px; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+      <div style="flex: 1; display: flex; flex-wrap: wrap; gap: 6px; min-height: 560px">
+
+        <!-- Outliner -->
+        <section aria-label="Outliner" style="border-radius: 10px; overflow: hidden; border: 1px solid #243035; box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 6px 18px rgba(0,0,0,.35); flex: 1 1 230px; max-width: 260px; display: flex; flex-direction: column; background: #141B1F">
+          <div style="display: flex; background: #0F1518; border-bottom: 1px solid #243035"><button class="tab on">Outliner</button><button class="tab">Calques</button></div>
+          <div style="display: flex; gap: 4px; padding: 6px">
+            <label style="flex: 1; display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 7px; border-radius: 6px; background: #0B1013; border: 1px solid #243035; color: #A3B0B6">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+              <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Filtrer les entités</span>
+              <input placeholder="Filtrer…  t:Mesh" style="flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: #E8ECEE; font: inherit; font-size: 11.5px">
+            </label>
+            <button class="ib" aria-label="Nouvelle entité" onClick="{{ addEntity }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+          </div>
+          <div class="scroll" style="flex: 1; overflow: auto; padding-bottom: 6px">
+            <sc-for list="{{ ents }}" as="e" hint-placeholder-count="10">
+              <div class="{{ e.cls }}">
+                <button class="pick" onClick="{{ e.select }}">
+                  <sc-if value="{{ e.isLight }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFC832" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"></path></svg></sc-if>
+                  <sc-if value="{{ e.isCam }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7FC4E0" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="14" height="10" rx="1"></rect><path d="m16 11 6-3v8l-6-3"></path></svg></sc-if>
+                  <sc-if value="{{ e.isMesh }}" hint-placeholder-val="{{ true }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7FC4E0" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"></path><path d="m3 7 9 5 9-5M12 12v10"></path></svg></sc-if>
+                  <sc-if value="{{ e.isEnt }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#BCC7CC" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="1.5" fill="#BCC7CC"></circle></svg></sc-if>
+                  <sc-if value="{{ e.isGhost }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFC832" stroke-width="2" stroke-dasharray="3 3" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg></sc-if>
+                  <span class="nm" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ e.name }}</span>
+                  <span class="mono" style="margin-left: auto; font-size: 10px; color: #8E9CA3">{{ e.tag }}</span>
+                </button>
+                <button class="{{ e.eyeCls }}" onClick="{{ e.toggleEye }}" aria-label="Afficher ou masquer"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></button>
+              </div>
+            </sc-for>
+          </div>
+          <div class="mono" style="display: flex; justify-content: space-between; padding: 5px 8px; border-top: 1px solid #243035; font-size: 10.5px; color: #8E9CA3"><span>{{ entCount }} entités</span><span>1 sélectionnée</span></div>
+        </section>
+
+        <!-- Viewport -->
+        <section aria-label="Viewport" class="{{ vpPanelCls }}" style="border-radius: 10px; overflow: hidden; border: 1px solid #243035; box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 6px 18px rgba(0,0,0,.35); flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; background: #141B1F">
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 5px 6px; background: #0F1518; border-bottom: 1px solid #243035">
+            <div class="seg">
+              <sc-for list="{{ tools }}" as="t" hint-placeholder-count="4">
+                <button class="{{ t.cls }}" onClick="{{ t.pick }}" aria-label="{{ t.label }}" data-tip="{{ t.tip }}">{{ t.key }}</button>
+              </sc-for>
+            </div>
+            <div class="seg"><button class="ib on">Local</button><button class="ib">Global</button></div>
+            <button class="ib mono" style="font-size: 10.5px; border: 1px solid #243035">⊞ 0.25 m</button>
+            <div style="flex: 1"></div>
+            <div class="seg">
+              <sc-for list="{{ shades }}" as="sh" hint-placeholder-count="3">
+                <button class="{{ sh.cls }}" onClick="{{ sh.pick }}">{{ sh.label }}</button>
+              </sc-for>
+            </div>
+            <button class="ib" style="border: 1px solid #243035">Persp ▾</button>
+          </div>
+
+          <div style="{{ vpStyle }}">
+            <svg role="img" aria-label="Vue 3D de la scène arena_01" viewBox="0 0 900 520" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%">
+              <defs>
+                <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0C1A22"></stop><stop offset=".55" stop-color="#1A2A33"></stop><stop offset="1" stop-color="#3A2228"></stop></linearGradient><radialGradient id="glow" cx=".5" cy=".62" r=".6"><stop offset="0" stop-color="#4299BF" stop-opacity=".14"></stop><stop offset="1" stop-color="#4299BF" stop-opacity="0"></stop></radialGradient>
+                <pattern id="iso" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="matrix(1 0.5 -1 0.5 450 140)"><path d="M40 0H0V40" fill="none" stroke="#2E3A40" stroke-width="1"></path></pattern>
+                <linearGradient id="cap" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3F4B52"></stop><stop offset=".45" stop-color="#8A99A1"></stop><stop offset="1" stop-color="#343E44"></stop></linearGradient>
+              </defs>
+              <rect width="900" height="520" fill="url(#sky)"></rect><rect width="900" height="520" fill="url(#glow)"></rect>
+              <polygon points="450,140 830,330 450,520 70,330" fill="#111A1E"></polygon>
+              <polygon points="450,140 830,330 450,520 70,330" fill="url(#iso)"></polygon>
+              <line x1="70" y1="330" x2="830" y2="330" stroke="none"></line>
+              <line x1="260" y1="235" x2="640" y2="425" stroke="#E0567A" stroke-width="1" opacity=".45"></line>
+              <line x1="640" y1="235" x2="260" y2="425" stroke="#4299BF" stroke-width="1" opacity=".45"></line>
+
+              <!-- Ombres -->
+              <polygon points="{{ pillar.sh }}" fill="#000" opacity=".32"></polygon>
+              <polygon points="{{ crateA.sh }}" fill="#000" opacity=".3"></polygon>
+              <polygon points="{{ crateB.sh }}" fill="#000" opacity=".3"></polygon>
+              <ellipse cx="462" cy="338" rx="34" ry="12" fill="#000" opacity=".4"></ellipse>
+
+              <!-- Pilier -->
+              <polygon points="{{ pillar.l }}" fill="#363F45"></polygon><polygon points="{{ pillar.r }}" fill="#48545B"></polygon><polygon points="{{ pillar.t }}" fill="#5B6870"></polygon>
+              <!-- Caisses -->
+              <polygon points="{{ crateA.l }}" fill="#6B4F30"></polygon><polygon points="{{ crateA.r }}" fill="#84623C"></polygon><polygon points="{{ crateA.t }}" fill="#A47C4C"></polygon>
+              <polygon points="{{ crateB.l }}" fill="#6B4F30"></polygon><polygon points="{{ crateB.r }}" fill="#84623C"></polygon><polygon points="{{ crateB.t }}" fill="#A47C4C"></polygon>
+              <!-- Spawn -->
+              <ellipse cx="250" cy="380" rx="22" ry="11" fill="none" stroke="#BCC7CC" stroke-width="1.5" stroke-dasharray="4 3"></ellipse>
+              <path d="M250 380v-26l12 6-12 6" fill="none" stroke="#BCC7CC" stroke-width="1.5"></path>
+
+              <!-- Couverts proposés / appliqués -->
+              <sc-for list="{{ covers }}" as="c" hint-placeholder-count="3">
+                <g opacity="{{ c.op }}">
+                  <polygon points="{{ c.l }}" fill="{{ c.fl }}" stroke="{{ c.st }}" stroke-width="1.5" stroke-dasharray="{{ c.da }}" class="{{ c.anim }}"></polygon>
+                  <polygon points="{{ c.r }}" fill="{{ c.fr }}" stroke="{{ c.st }}" stroke-width="1.5" stroke-dasharray="{{ c.da }}" class="{{ c.anim }}"></polygon>
+                  <polygon points="{{ c.t }}" fill="{{ c.ft }}" stroke="{{ c.st }}" stroke-width="1.5" stroke-dasharray="{{ c.da }}" class="{{ c.anim }}"></polygon>
+                </g>
+              </sc-for>
+
+              <!-- Joueur sélectionné -->
+              <rect x="444" y="252" width="36" height="84" rx="18" fill="url(#cap)"></rect>
+              <rect x="441" y="249" width="42" height="90" rx="21" fill="none" stroke="#4299BF" stroke-width="2"></rect>
+              <path d="M428 244h-6v8M496 244h6v8M428 346h-6v-8M496 346h6v-8" fill="none" stroke="#4299BF" stroke-width="1.5"></path>
+
+              <!-- Gizmo déplacement -->
+              <g opacity="{{ gizMove }}">
+                <line x1="462" y1="296" x2="462" y2="196" stroke="#3FBF9F" stroke-width="2.5"></line><polygon points="462,184 456,198 468,198" fill="#3FBF9F"></polygon>
+                <line x1="462" y1="296" x2="552" y2="341" stroke="#E0567A" stroke-width="2.5"></line><polygon points="563,347 548,346 554,334" fill="#E0567A"></polygon>
+                <line x1="462" y1="296" x2="372" y2="341" stroke="#4299BF" stroke-width="2.5"></line><polygon points="361,347 370,334 376,346" fill="#4299BF"></polygon>
+                <polygon points="462,296 482,306 462,316 442,306" fill="#FFC832" opacity=".35"></polygon>
+              </g>
+              <!-- Gizmo rotation -->
+              <g opacity="{{ gizRot }}" fill="none" stroke-width="2.5">
+                <ellipse cx="462" cy="296" rx="70" ry="35" stroke="#3FBF9F"></ellipse>
+                <ellipse cx="462" cy="296" rx="30" ry="70" stroke="#E0567A" transform="rotate(-26 462 296)"></ellipse>
+                <ellipse cx="462" cy="296" rx="30" ry="70" stroke="#4299BF" transform="rotate(26 462 296)"></ellipse>
+              </g>
+              <!-- Gizmo échelle -->
+              <g opacity="{{ gizScale }}">
+                <line x1="462" y1="296" x2="462" y2="206" stroke="#3FBF9F" stroke-width="2.5"></line><rect x="456" y="196" width="12" height="12" fill="#3FBF9F"></rect>
+                <line x1="462" y1="296" x2="542" y2="336" stroke="#E0567A" stroke-width="2.5"></line><rect x="540" y="332" width="12" height="12" fill="#E0567A"></rect>
+                <line x1="462" y1="296" x2="382" y2="336" stroke="#4299BF" stroke-width="2.5"></line><rect x="372" y="332" width="12" height="12" fill="#4299BF"></rect>
+              </g>
+              <!-- Cote -->
+              <g opacity="{{ gizMove }}">
+                <line x1="500" y1="252" x2="500" y2="336" stroke="#E8ECEE" stroke-width="1" stroke-dasharray="2 3"></line>
+                <rect x="506" y="284" width="44" height="18" rx="2" fill="#090D10" opacity=".85"></rect>
+                <text x="528" y="297" text-anchor="middle" font-family="Fira Mono, monospace" font-size="10.5" fill="#E8ECEE">1.80 m</text>
+              </g>
+            </svg>
+
+            <!-- Infos caméra -->
+            <div class="mono" style="position: absolute; top: 10px; left: 10px; font-size: 10.5px; line-height: 1.6; color: #BCC7CC; text-shadow: 0 1px 2px #000">
+              <div>Perspective · Lit</div><div style="color: #A3B0B6">{{ selName }} · 3 composants</div>
+            </div>
+            <!-- Cube d'orientation -->
+            <svg aria-hidden="true" width="64" height="64" viewBox="0 0 64 64" style="position: absolute; top: 10px; right: 10px">
+              <circle cx="32" cy="32" r="30" fill="#090D10" opacity=".55"></circle>
+              <line x1="32" y1="32" x2="32" y2="10" stroke="#3FBF9F" stroke-width="2"></line><circle cx="32" cy="10" r="6" fill="#3FBF9F"></circle><text x="32" y="13" text-anchor="middle" font-size="8" font-weight="700" fill="#090D10" font-family="Fira Mono, monospace">Y</text>
+              <line x1="32" y1="32" x2="52" y2="42" stroke="#E0567A" stroke-width="2"></line><circle cx="52" cy="42" r="6" fill="#E0567A"></circle><text x="52" y="45" text-anchor="middle" font-size="8" font-weight="700" fill="#090D10" font-family="Fira Mono, monospace">X</text>
+              <line x1="32" y1="32" x2="12" y2="42" stroke="#4299BF" stroke-width="2"></line><circle cx="12" cy="42" r="6" fill="#4299BF"></circle><text x="12" y="45" text-anchor="middle" font-size="8" font-weight="700" fill="#090D10" font-family="Fira Mono, monospace">Z</text>
+            </svg>
+
+            <!-- Proposition de l'agent -->
+            <sc-if value="{{ pending }}" hint-placeholder-val="{{ true }}">
+              <div style="position: absolute; right: 10px; bottom: 10px; width: 290px; background: #0F1518; border: 1px solid #4D4020; border-radius: 9px; box-shadow: 0 10px 30px rgba(0,0,0,.5)">
+                <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #4D4020">
+                  <span class="live" style="width: 6px; height: 6px; border-radius: 6px; background: #FFC832"></span>
+                  <span style="font-size: 12px; font-weight: 600; color: #FFE7A3">Proposition de l'agent</span>
+                  <span class="mono" style="margin-left: auto; font-size: 10.5px; color: #FFD970">4 changements</span>
+                </div>
+                <div class="mono" style="padding: 8px 10px; font-size: 11px; line-height: 1.7">
+                  <div><span style="color: #3FBF9F">+</span> Cover_A <span style="color: #A3B0B6">(3.0, 0, -5.2)</span></div>
+                  <div><span style="color: #3FBF9F">+</span> Cover_B <span style="color: #A3B0B6">(-6.0, 0, 0.0)</span></div>
+                  <div><span style="color: #3FBF9F">+</span> Cover_C <span style="color: #A3B0B6">(3.0, 0, 5.2)</span></div>
+                  <div><span style="color: #FFC832">~</span> Arena.children <span style="color: #A3B0B6">9 → 12</span></div>
+                </div>
+                <div style="display: flex; gap: 6px; padding: 0 10px 10px">
+                  <button class="btn pri" onClick="{{ accept }}">Appliquer <kbd style="background: transparent; border-color: rgba(30,22,0,.35); color: #1E1600">A</kbd></button>
+                  <button class="btn danger" onClick="{{ reject }}">Rejeter</button>
+                  <button class="btn" style="margin-left: auto" onClick="{{ openAgent }}">Détails</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- Play -->
+            <sc-if value="{{ playing }}" hint-placeholder-val="{{ false }}">
+              <div class="mono" style="position: absolute; left: 10px; bottom: 10px; display: flex; align-items: center; gap: 8px; height: 24px; padding: 0 9px; border-radius: 5px; background: #0B7261; color: #FFFFFF; font-size: 10.5px; font-weight: 500">
+                <span class="live" style="width: 6px; height: 6px; border-radius: 6px; background: #FFFFFF"></span>EN JEU · état restauré à l'arrêt
+              </div>
+            </sc-if>
+
+            <!-- Toast -->
+            <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+              <div class="toast" role="status" style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 6px 0 12px; border-radius: 9px; background: #E8ECEE; color: #0B1418; font-size: 12px; font-weight: 500; box-shadow: 0 10px 28px rgba(0,0,0,.5); white-space: nowrap">
+                <svg class="pop" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ toastColor }}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ toastIcon }}"></path></svg>{{ toast }}
+                <button class="ib" style="color: #0B1418; background: rgba(0,0,0,.08); height: 22px" onClick="{{ hideToast }}">Annuler <kbd style="margin-left: 6px; background: transparent; color: #3E4C53; border-color: rgba(0,0,0,.2)">Ctrl Z</kbd></button>
+              </div>
+            </sc-if>
+          </div>
+        </section>
+      </div>
+
+      <!-- Panneau bas -->
+      <section aria-label="Timeline, console et assets" style="border-radius: 10px; overflow: hidden; border: 1px solid #243035; box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 6px 18px rgba(0,0,0,.35); height: 214px; display: flex; flex-direction: column; background: #141B1F">
+        <div style="display: flex; align-items: center; background: #0F1518; border-bottom: 1px solid #243035">
+          <sc-for list="{{ btabs }}" as="b" hint-placeholder-count="4">
+            <button class="{{ b.cls }}" onClick="{{ b.pick }}">{{ b.label }}</button>
+          </sc-for>
+          <div style="flex: 1"></div>
+          <span class="mono" style="padding: 0 10px; font-size: 10.5px; color: #8E9CA3">{{ btabInfo }}</span>
+        </div>
+
+        <sc-if value="{{ isTimeline }}" hint-placeholder-val="{{ true }}">
+          <div style="flex: 1; display: flex; min-height: 0">
+            <div style="width: 180px; flex: none; border-right: 1px solid #243035; font-size: 11.5px">
+              <div class="cap" style="height: 24px; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid #243035">Player · Clip « idle_look »</div>
+              <div style="height: 26px; display: flex; align-items: center; gap: 7px; padding: 0 10px; color: #D3DADD"><span class="tick tx"></span>Transform.translation</div>
+              <div style="height: 26px; display: flex; align-items: center; gap: 7px; padding: 0 10px; color: #D3DADD"><span class="tick ty"></span>Transform.rotation</div>
+              <div style="height: 26px; display: flex; align-items: center; gap: 7px; padding: 0 10px; color: #D3DADD"><span class="tick tz"></span>Camera.fov</div>
+              <div style="height: 26px; display: flex; align-items: center; gap: 7px; padding: 0 10px; color: #D3DADD"><span class="tick" style="background: #FFC832"></span>Event · footstep</div>
+            </div>
+            <svg role="img" aria-label="Timeline avec images clés" viewBox="0 0 900 130" preserveAspectRatio="none" style="flex: 1; min-width: 0; height: 130px">
+              <rect width="900" height="24" fill="#0F1518"></rect>
+              <g stroke="#2E3A40"><line x1="0" y1="24" x2="900" y2="24"></line><line x1="0" y1="50" x2="900" y2="50"></line><line x1="0" y1="76" x2="900" y2="76"></line><line x1="0" y1="102" x2="900" y2="102"></line></g>
+              <g stroke="#4B5B63"><line x1="60" y1="16" x2="60" y2="24"></line><line x1="210" y1="16" x2="210" y2="24"></line><line x1="360" y1="16" x2="360" y2="24"></line><line x1="510" y1="16" x2="510" y2="24"></line><line x1="660" y1="16" x2="660" y2="24"></line><line x1="810" y1="16" x2="810" y2="24"></line></g>
+              <g font-family="Fira Mono, monospace" font-size="10" fill="#A3B0B6"><text x="64" y="14">0</text><text x="214" y="14">24</text><text x="364" y="14">48</text><text x="514" y="14">72</text><text x="664" y="14">96</text><text x="814" y="14">120</text></g>
+              <rect x="60" y="24" width="600" height="106" fill="#4299BF" opacity=".04"></rect>
+              <g fill="#E0567A"><path d="M60 31l6 6-6 6-6-6z"></path><path d="M285 31l6 6-6 6-6-6z"></path><path d="M510 31l6 6-6 6-6-6z"></path><path d="M660 31l6 6-6 6-6-6z"></path></g>
+              <line x1="60" y1="37" x2="660" y2="37" stroke="#E0567A" opacity=".25" stroke-width="2"></line>
+              <g fill="#3FBF9F"><path d="M60 57l6 6-6 6-6-6z"></path><path d="M210 57l6 6-6 6-6-6z"></path><path d="M435 57l6 6-6 6-6-6z"></path><path d="M660 57l6 6-6 6-6-6z"></path></g>
+              <line x1="60" y1="63" x2="660" y2="63" stroke="#3FBF9F" opacity=".25" stroke-width="2"></line>
+              <g fill="#4299BF"><path d="M60 83l6 6-6 6-6-6z"></path><path d="M600 83l6 6-6 6-6-6z"></path></g>
+              <line x1="60" y1="89" x2="600" y2="89" stroke="#4299BF" opacity=".25" stroke-width="2"></line>
+              <g fill="#FFC832"><rect x="180" y="110" width="3" height="14"></rect><rect x="405" y="110" width="3" height="14"></rect><rect x="630" y="110" width="3" height="14"></rect></g>
+              <line x1="370" y1="0" x2="370" y2="130" stroke="#E0567A" stroke-width="1.5"></line>
+              <path d="M362 0h16v12l-8 6-8-6z" fill="#E0567A"></path>
+            </svg>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isConsole }}" hint-placeholder-val="{{ false }}">
+          <div class="mono scroll" style="flex: 1; overflow: auto; padding: 6px 0; font-size: 11px; line-height: 21px">
+            <sc-for list="{{ logs }}" as="l" hint-placeholder-count="5">
+              <div style="display: flex; gap: 12px; padding: 0 10px"><span style="color: #8E9CA3">{{ l.t }}</span><span class="{{ l.cls }}">{{ l.lvl }}</span><span style="color: #D3DADD">{{ l.msg }}</span></div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isAssets }}" hint-placeholder-val="{{ false }}">
+          <div style="flex: 1; display: flex; min-height: 0">
+            <div class="mono" style="width: 180px; flex: none; border-right: 1px solid #243035; padding: 6px 0; font-size: 11px; line-height: 22px; color: #BCC7CC">
+              <div style="padding: 0 10px">▾ assets</div><div style="padding: 0 22px; background: #1E3A48; color: #FFF">▾ arena</div><div style="padding: 0 34px">materials</div><div style="padding: 0 34px">meshes</div><div style="padding: 0 22px">▸ player</div><div style="padding: 0 22px">▸ audio</div>
+            </div>
+            <div class="scroll" style="flex: 1; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 2px; padding: 6px; overflow: auto">
+              <sc-for list="{{ assets }}" as="a" hint-placeholder-count="7">
+                <button class="tile" onClick="{{ a.pick }}">
+                  <svg aria-hidden="true" viewBox="0 0 78 54" width="78" height="54" style="border-radius: 6px; background: #0B1013">
+                    <polygon points="39,12 58,22 39,32 20,22" fill="{{ a.c1 }}"></polygon><polygon points="20,22 39,32 39,46 20,36" fill="{{ a.c2 }}"></polygon><polygon points="58,22 39,32 39,46 58,36" fill="{{ a.c3 }}"></polygon>
+                  </svg>
+                  <span style="font-size: 11px; color: #D3DADD; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ a.name }}</span>
+                  <span class="mono" style="font-size: 9.5px; color: #8E9CA3">{{ a.type }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </section>
+    </div>
+
+    <!-- Colonne droite -->
+    <aside aria-label="Inspecteur et agent" style="border-radius: 10px; overflow: hidden; border: 1px solid #243035; box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 6px 18px rgba(0,0,0,.35); flex: 1 1 320px; max-width: 360px; display: flex; flex-direction: column; background: #141B1F">
+      <div style="display: flex; background: #0F1518; border-bottom: 1px solid #243035">
+        <sc-for list="{{ rtabs }}" as="r" hint-placeholder-count="2">
+          <button class="{{ r.cls }}" onClick="{{ r.pick }}">{{ r.label }}</button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ isInsp }}" hint-placeholder-val="{{ true }}">
+        <div class="scroll" style="flex: 1; overflow: auto">
+          <div style="display: flex; align-items: center; gap: 8px; padding: 10px">
+            <span class="sw on" aria-hidden="true"></span>
+            <span style="flex: 1; height: 26px; display: flex; align-items: center; padding: 0 8px; border-radius: 6px; background: #0B1013; border: 1px solid #243035; font-size: 13px; font-weight: 600">{{ selName }}</span>
+            <span class="mono" style="font-size: 10.5px; color: #8E9CA3">{{ selId }}</span>
+          </div>
+          <div style="display: flex; gap: 4px; padding: 0 10px 10px; flex-wrap: wrap">
+            <sc-for list="{{ tags }}" as="tg" hint-placeholder-count="2"><span class="mono" style="height: 20px; display: inline-flex; align-items: center; padding: 0 6px; border-radius: 4px; background: #26323A; font-size: 10.5px; color: #BCC7CC">{{ tg }}</span></sc-for>
+          </div>
+          <sc-for list="{{ comps }}" as="c" hint-placeholder-count="3">
+            <div class="comp">
+              <button class="chead">
+                <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 3h8L5 8z" fill="#A3B0B6"></path></svg>
+                <span class="tick" style="background: #4299BF"></span>{{ c.name }}
+                <span class="mono" style="margin-left: auto; font-size: 10px; color: #8E9CA3">{{ c.src }}</span>
+              </button>
+              <div style="display: flex; flex-direction: column; gap: 5px; padding: 2px 10px 10px">
+                <sc-for list="{{ c.rows }}" as="row" hint-placeholder-count="3">
+                  <div style="display: flex; align-items: center; gap: 8px; min-height: 22px">
+                    <span style="width: 74px; flex: none; font-size: 11.5px; color: #BCC7CC">{{ row.k }}</span>
+                    <sc-if value="{{ row.isVec }}" hint-placeholder-val="{{ true }}">
+                      <div style="flex: 1; display: flex; gap: 3px; min-width: 0">
+                        <span class="num"><span class="tick tx"></span>{{ row.x }}</span><span class="num"><span class="tick ty"></span>{{ row.y }}</span><span class="num"><span class="tick tz"></span>{{ row.z }}</span>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ row.isSlider }}" hint-placeholder-val="{{ false }}">
+                      <span class="num" style="position: relative; overflow: hidden; padding: 0">
+                        <svg aria-hidden="true" viewBox="0 0 100 10" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%"><rect width="{{ row.pct }}" height="10" fill="#4299BF" opacity=".28"></rect></svg>
+                        <span style="position: relative; padding: 0 8px">{{ row.v }}</span>
+                      </span>
+                    </sc-if>
+                    <sc-if value="{{ row.isText }}" hint-placeholder-val="{{ false }}">
+                      <span class="num" style="cursor: default">{{ row.v }}<span style="margin-left: auto; color: #A3B0B6">{{ row.suffix }}</span></span>
+                    </sc-if>
+                    <sc-if value="{{ row.isColor }}" hint-placeholder-val="{{ false }}">
+                      <span class="num" style="cursor: pointer"><svg aria-hidden="true" width="26" height="12"><rect width="26" height="12" rx="2" fill="{{ row.v }}"></rect></svg>{{ row.v }}</span>
+                    </sc-if>
+                    <sc-if value="{{ row.isToggle }}" hint-placeholder-val="{{ false }}">
+                      <button class="{{ row.swCls }}" onClick="{{ row.flip }}" aria-label="{{ row.k }}"></button>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+          <div style="padding: 10px; border-top: 1px solid #243035"><button class="btn" style="width: 100%; justify-content: center">Ajouter un composant <kbd>Shift A</kbd></button></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAgent }}" hint-placeholder-val="{{ false }}">
+        <div style="flex: 1; display: flex; flex-direction: column; min-height: 0">
+          <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #243035">
+            <span class="live" style="width: 6px; height: 6px; border-radius: 6px; background: #FFC832"></span>
+            <span class="mono" style="font-size: 11px; color: #FFE7A3">claude-code</span>
+            <span class="mono" style="font-size: 10.5px; color: #8E9CA3">stdio · 14 outils</span>
+            <button class="ib" style="margin-left: auto; font-size: 11px">Mode : proposer ▾</button>
+          </div>
+          <div class="scroll" style="flex: 1; overflow: auto">
+            <sc-for list="{{ log }}" as="g" hint-placeholder-count="2">
+              <div style="padding: 10px; border-bottom: 1px solid #243035">
+                <div style="display: flex; align-items: baseline; gap: 8px">
+                  <span class="mono" style="font-size: 10.5px; color: #8E9CA3">{{ g.time }}</span>
+                  <span style="font-size: 12px; font-weight: 600; flex: 1">{{ g.title }}</span>
+                  <span class="{{ g.stCls }}">{{ g.status }}</span>
+                </div>
+                <div class="mono" style="margin-top: 6px; padding: 6px 8px; border-left: 2px solid #36444A; background: #0F1518; font-size: 10.5px; line-height: 1.7">
+                  <sc-for list="{{ g.lines }}" as="ln" hint-placeholder-count="2"><div><span class="{{ ln.cls }}">{{ ln.sym }}</span> {{ ln.text }}</div></sc-for>
+                </div>
+                <div class="mono" style="margin-top: 5px; font-size: 10px; color: #8E9CA3">{{ g.tools }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding: 8px 10px 10px; border-top: 1px solid #243035">
+            <div style="display: flex; gap: 4px; margin-bottom: 6px">
+              <span class="mono" style="height: 20px; display: inline-flex; align-items: center; padding: 0 6px; border-radius: 4px; background: #1E3A48; font-size: 10.5px; color: #BFE3F2">@{{ selName }}</span>
+              <span class="mono" style="height: 20px; display: inline-flex; align-items: center; padding: 0 6px; border-radius: 4px; background: #26323A; font-size: 10.5px; color: #BCC7CC">@arena_01</span>
+            </div>
+            <label style="display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 8px; border-radius: 6px; background: #0B1013; border: 1px solid #36444A">
+              <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Instruction pour l'agent</span>
+              <input placeholder="Ex. ajoute une rampe vers le pilier" style="flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: #E8ECEE; font: inherit; font-size: 12px">
+              <button class="btn pri" style="height: 24px" onClick="{{ askAgain }}">Envoyer</button>
+            </label>
+          </div>
+        </div>
+      </sc-if>
+    </aside>
+  </div>
+
+  <!-- Barre d'état -->
+  <footer class="mono" style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; height: auto; min-height: 24px; padding: 0 10px; background: #0F1518; border-top: 1px solid #243035; font-size: 10.5px; color: #A3B0B6">
+    <span style="color: {{ stColor }}">● {{ statusText }}</span>
+    <span>bevy 0.20</span>
+    <span style="display: flex; align-items: center; gap: 6px">
+      <svg aria-hidden="true" width="60" height="12" viewBox="0 0 60 12"><polyline points="0,8 6,7 12,8 18,6 24,7 30,3 36,7 42,6 48,7 54,6 60,7" fill="none" stroke="#3FBF9F" stroke-width="1.2"></polyline></svg>6.9 ms · 144 fps
+    </span>
+    <span>{{ entCount }} entités · 1 284 draws</span>
+    <div style="flex: 1"></div>
+    <span>W E R gizmos · F cadrer · A appliquer</span>
+    <span>enregistré il y a 12 s</span>
+  </footer>
+
+  <!-- Palette de commandes -->
+  <sc-if value="{{ palette }}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; display: flex; justify-content: center; align-items: flex-start; padding-top: 90px">
+      <button aria-label="Fermer la palette" onClick="{{ closePalette }}" style="position: absolute; inset: 0; background: rgba(6,9,11,.55); cursor: default"></button>
+      <div class="pal" style="position: relative; width: 560px; max-width: 92%; background: #141B1F; border: 1px solid #3E4C53; border-radius: 12px; box-shadow: 0 24px 60px rgba(0,0,0,.6); overflow: hidden">
+        <div style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-bottom: 1px solid #243035">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A3B0B6" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+          <span style="font-size: 14px">cou<span style="display: inline-block; width: 1px; height: 16px; background: #4299BF; vertical-align: middle" class="live"></span></span>
+        </div>
+        <div style="padding: 6px">
+          <div class="cap" style="padding: 6px 12px 4px">Commandes</div>
+          <sc-for list="{{ cmds }}" as="k" hint-placeholder-count="4">
+            <button class="{{ k.cls }}" onClick="{{ k.run }}"><span style="flex: 1">{{ k.label }}</span><kbd>{{ k.key }}</kbd></button>
+          </sc-for>
+          <div class="cap" style="padding: 10px 12px 4px">Agent</div>
+          <button class="cmd" onClick="{{ askFromPalette }}"><span style="color: #FFC832">→</span><span style="flex: 1">Demander à l'agent : « cou… »</span><kbd>Tab</kbd></button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = { sel: 'player', tool: 'move', shade: 'lit', playing: false, rtab: 'insp', btab: 'timeline', toast: null, prop: 'pending', extra: 0, hidden: {}, palette: false, flags: { shadows: true, grounded: true } };
+  }
+  toastMsg(t, kind) {
+    this.setState({ toast: t, toastKind: kind || 'ok' });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: null }), 2800);
+  }
+  box(cx, cy, a, b, h) {
+    const N = [cx - a + b, cy - .5 * a - .5 * b], E = [cx + a + b, cy + .5 * a - .5 * b], S = [cx + a - b, cy + .5 * a + .5 * b], W = [cx - a - b, cy - .5 * a + .5 * b];
+    const up = p => [p[0], p[1] - h];
+    const s = ps => ps.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const off = p => [p[0] + h * .55, p[1] + h * .2];
+    return { t: s([up(N), up(E), up(S), up(W)]), l: s([up(W), up(S), S, W]), r: s([up(S), up(E), E, S]), sh: s([W, S, E, off(E), off(S), off(W)]) };
+  }
+  renderVals() {
+    const s = this.state;
+    const base = [
+      { id: 'sun', name: 'Sun', t: 'light', d: 0, tag: '' },
+      { id: 'cam', name: 'Main Camera', t: 'cam', d: 0, tag: '' },
+      { id: 'player', name: 'Player', t: 'ent', d: 0, tag: 'prefab' },
+      { id: 'body', name: 'Body', t: 'mesh', d: 1, tag: '' },
+      { id: 'weapon', name: 'WeaponSocket', t: 'ent', d: 1, tag: '' },
+      { id: 'arena', name: 'Arena', t: 'ent', d: 0, tag: '9' },
+      { id: 'floor', name: 'Floor', t: 'mesh', d: 1, tag: '' },
+      { id: 'pillar', name: 'Pillar', t: 'mesh', d: 1, tag: 'static' },
+      { id: 'crate1', name: 'Crate', t: 'mesh', d: 1, tag: '' },
+      { id: 'crate2', name: 'Crate.001', t: 'mesh', d: 1, tag: '' },
+      { id: 'spawn', name: 'SpawnPoint', t: 'ent', d: 1, tag: 'agent' }
+    ];
+    const cov = ['Cover_A', 'Cover_B', 'Cover_C'];
+    let all = base.slice();
+    if (s.prop === 'pending') all = all.concat(cov.map((n, i) => ({ id: 'c' + i, name: n, t: 'ghost', d: 1, tag: 'proposé' })));
+    if (s.prop === 'applied') all = all.concat(cov.map((n, i) => ({ id: 'c' + i, name: n, t: 'mesh', d: 1, tag: 'agent' })));
+    for (let i = 0; i < s.extra; i++) all.push({ id: 'n' + i, name: 'Entity.' + String(i + 1).padStart(3, '0'), t: 'ent', d: 0, tag: '' });
+    const ents = all.map(e => {
+      const hid = !!s.hidden[e.id];
+      return {
+        ...e, isLight: e.t === 'light', isCam: e.t === 'cam', isMesh: e.t === 'mesh', isEnt: e.t === 'ent', isGhost: e.t === 'ghost',
+        cls: 'orow d' + e.d + (e.id === s.sel ? ' sel' : '') + (hid ? ' hid' : '') + (e.t === 'ghost' ? ' ghost' : ''),
+        eyeCls: 'eye' + (hid ? ' off' : ''),
+        select: () => this.setState({ sel: e.id, rtab: 'insp' }),
+        toggleEye: () => this.setState({ hidden: { ...s.hidden, [e.id]: !hid } })
+      };
+    });
+    const cur = all.find(e => e.id === s.sel) || base[2];
+
+    const vec = (k, x, y, z) => ({ k, isVec: true, x, y, z });
+    const txt = (k, v, suffix) => ({ k, isText: true, v, suffix: suffix || '' });
+    const sld = (k, v, pct) => ({ k, isSlider: true, v, pct });
+    const col = (k, v) => ({ k, isColor: true, v });
+    const tog = (k, key) => ({ k, isToggle: true, swCls: 'sw' + (s.flags[key] ? ' on' : ''), flip: () => this.setState({ flags: { ...s.flags, [key]: !s.flags[key] } }) });
+    const comps = [{ name: 'Transform', src: 'bevy', rows: [vec('Position', '0.00', '0.90', '0.00'), vec('Rotation', '0.0°', '45.0°', '0.0°'), vec('Échelle', '1.00', '1.00', '1.00')] }];
+    let tags = ['Entity'];
+    if (cur.t === 'light') { comps.push({ name: 'DirectionalLight', src: 'bevy', rows: [sld('Intensité', '12 000 lux', 60), col('Couleur', '#FFE7C2'), tog('Ombres', 'shadows')] }); tags = ['Light', 'Static']; }
+    else if (cur.t === 'cam') { comps.push({ name: 'Camera3d', src: 'bevy', rows: [sld('FOV', '70°', 58), txt('Near / Far', '0.1 / 1000', 'm'), tog('HDR', 'shadows')] }); tags = ['Camera', 'MainCamera']; }
+    else if (cur.t === 'mesh' || cur.t === 'ghost') { comps.push({ name: 'Mesh3d', src: 'bevy', rows: [txt('Mesh', 'crate.glb#Mesh0'), txt('Matériau', 'wood_worn.mat')] }, { name: 'Collider', src: 'avian', rows: [txt('Forme', 'Cuboid'), sld('Friction', '0.60', 60), tog('Statique', 'grounded')] }); tags = ['Mesh', 'Static']; }
+    else { comps.push({ name: 'PlayerController', src: 'game', rows: [sld('Vitesse', '6.50 m/s', 65), sld('Saut', '1.40 m', 47), sld('Accélération', '42.0', 70), tog('Au sol', 'grounded')] }, { name: 'Health', src: 'game', rows: [sld('PV', '100 / 100', 100), txt('Régén', '4.0', '/s')] }); tags = ['Player', 'Replicated', 'Prefab'] ; }
+
+    const tools = [['select', 'Q', 'Sélection'], ['move', 'W', 'Déplacer'], ['rotate', 'E', 'Pivoter'], ['scale', 'R', 'Échelle']].map(([id, key, label]) => ({ key, label, tip: label + '  ' + key, cls: 'ib mono' + (s.tool === id ? ' on' : ''), pick: () => this.setState({ tool: id }) }));
+    const shades = [['wire', 'Fil'], ['solid', 'Solide'], ['lit', 'Éclairé']].map(([id, label]) => ({ label, cls: 'ib' + (s.shade === id ? ' on' : ''), pick: () => this.setState({ shade: id }) }));
+    const rtabs = [['insp', 'Inspecteur'], ['agent', 'Agent']].map(([id, label]) => ({ label: id === 'agent' && s.prop === 'pending' ? 'Agent · 1' : label, cls: 'tab' + (s.rtab === id ? ' on' : ''), pick: () => this.setState({ rtab: id }) }));
+    const btabs = [['timeline', 'Timeline'], ['console', 'Console'], ['assets', 'Assets']].map(([id, label]) => ({ label, cls: 'tab' + (s.btab === id ? ' on' : ''), pick: () => this.setState({ btab: id }) }));
+    const btabInfo = s.btab === 'timeline' ? 'image 46 / 120 · 60 i/s' : s.btab === 'console' ? '1 avertissement' : 'assets/arena';
+
+    const assets = [['crate.glb', 'GLB', '#A47C4C', '#6B4F30', '#84623C'], ['barrel.glb', 'GLB', '#8A7A62', '#4F463A', '#6A5E4E'], ['pillar.glb', 'GLB', '#5B6870', '#363F45', '#48545B'], ['wood_worn', 'MATÉRIAU', '#C08A55', '#8A5F36', '#A47547'], ['concrete', 'MATÉRIAU', '#7A868C', '#515C62', '#66737A'], ['cover_low', 'PREFAB', '#FFC832', '#2E6E68', '#46A199'], ['arena_01', 'SCÈNE', '#4299BF', '#9E4F1C', '#C9682A']]
+      .map(([name, type, c1, c2, c3]) => ({ name, type, c1, c2, c3, pick: () => this.toastMsg(name + ' → glissez dans la vue pour instancier') }));
+    const logs = [
+      { t: '14:02:11.204', lvl: 'INFO', cls: 'lv-info', msg: 'scène arena_01 chargée — 11 entités, 3 ms' },
+      { t: '14:02:12.880', lvl: 'MCP ', cls: 'lv-mcp', msg: 'client connecté : claude-code (stdio)' },
+      { t: '14:03:40.117', lvl: 'MCP ', cls: 'lv-mcp', msg: 'spawn_entity → SpawnPoint #11v0' },
+      { t: '14:03:41.002', lvl: 'WARN', cls: 'lv-warn', msg: 'crate.glb : 2 matériaux sans normal map' },
+      { t: '14:06:02.551', lvl: 'MCP ', cls: 'lv-mcp', msg: 'propose_changes → 4 changements en attente' }
+    ];
+
+    const stTxt = { pending: 'en attente', applied: 'appliqué', rejected: 'rejeté' }[s.prop];
+    const log = [
+      { time: '14:03', title: 'Placer un spawn derrière le pilier', status: 'appliqué', stCls: 'mono st-ok', lines: [{ sym: '+', cls: '', text: 'SpawnPoint (-4.0, 0, 2.0)' }], tools: 'spawn_entity · set_component · 38 ms' },
+      { time: '14:06', title: 'Ajouter 3 couverts autour du centre', status: stTxt, stCls: 'mono st-' + s.prop, lines: [{ sym: '+', cls: '', text: 'Cover_A, Cover_B, Cover_C' }, { sym: '~', cls: '', text: 'Arena.children 9 → 12' }], tools: 'find_entities · propose_changes · 51 ms' }
+    ];
+
+    const covers = [this.box(560, 262, 36, 7, 30), this.box(300, 445, 7, 36, 30), this.box(600, 430, 36, 7, 30)].map(b => {
+      const ghost = s.prop === 'pending';
+      return { ...b, op: s.prop === 'rejected' ? 0 : 1, fl: ghost ? 'rgba(255,200,50,.06)' : '#3A454B', fr: ghost ? 'rgba(255,200,50,.1)' : '#4F5C63', ft: ghost ? 'rgba(255,200,50,.16)' : '#66747B', st: ghost ? '#FFC832' : 'none', da: ghost ? '5 4' : '0', anim: ghost ? 'ghostline' : '' };
+    });
+
+    const cmds = [['Créer un couvert bas', 'Shift A'], ['Coller les composants', 'Ctrl Shift V'], ['Basculer la grille de couverture', 'G'], ['Ouvrir cover_low.prefab', 'Entrée']].map(([label, key], i) => ({ label, key, cls: 'cmd' + (i === 0 ? ' first' : ''), run: () => { this.setState({ palette: false }); this.toastMsg(label); } }));
+
+    return {
+      ents, comps, tags, tools, shades, rtabs, btabs, btabInfo, assets, logs, log, covers, cmds,
+      pillar: this.box(330, 290, 30, 30, 150), crateA: this.box(640, 360, 24, 24, 48), crateB: this.box(690, 318, 18, 18, 36),
+      selName: cur.name, selId: '#' + (all.indexOf(cur) + 1) + 'v0',
+      playing: s.playing, notPlaying: !s.playing,
+      playCls: 'play' + (s.playing ? ' on' : ''),
+      vpPanelCls: s.playing ? 'vpp playing' : 'vpp',
+      vpStyle: s.playing ? 'position: relative; flex: 1; min-height: 0; overflow: hidden; box-shadow: inset 0 0 40px rgba(63,191,159,.12)' : 'position: relative; flex: 1; min-height: 0; overflow: hidden',
+      gizMove: s.tool === 'move' ? 1 : 0, gizRot: s.tool === 'rotate' ? 1 : 0, gizScale: s.tool === 'scale' ? 1 : 0,
+      pending: s.prop === 'pending',
+      isInsp: s.rtab === 'insp', isAgent: s.rtab === 'agent',
+      isTimeline: s.btab === 'timeline', isConsole: s.btab === 'console', isAssets: s.btab === 'assets',
+      hasToast: !!s.toast, toast: s.toast,
+      toastColor: { ok: '#0B7261', play: '#0B7261', warn: '#B8860B', bad: '#A72145' }[s.toastKind || 'ok'],
+      toastIcon: { ok: 'M20 6 9 17l-5-5', play: 'M7 4v16l13-8z', warn: 'M12 8v5M12 17h.01', bad: 'M18 6 6 18M6 6l12 12' }[s.toastKind || 'ok'], palette: s.palette,
+      hideToast: () => this.setState({ toast: null }),
+      togglePlay: () => { const p = !s.playing; this.setState({ playing: p }); this.toastMsg(p ? 'Mode jeu lancé' : 'Mode jeu arrêté · scène restaurée', p ? 'play' : 'ok'); },
+      accept: () => { this.setState({ prop: 'applied', sel: 'c0' }); this.toastMsg('Agent : 4 changements appliqués'); },
+      reject: () => { this.setState({ prop: 'rejected' }); this.toastMsg('Proposition rejetée', 'bad'); },
+      askAgain: () => { this.setState({ prop: 'pending', rtab: 'agent' }); this.toastMsg('Nouvelle proposition de l’agent', 'warn'); },
+      openAgent: () => this.setState({ rtab: 'agent' }),
+      openPalette: () => this.setState({ palette: true }),
+      closePalette: () => this.setState({ palette: false }),
+      askFromPalette: () => { this.setState({ palette: false, prop: 'pending', rtab: 'agent' }); this.toastMsg('Demande envoyée à claude-code', 'warn'); },
+      addEntity: () => { this.setState({ extra: s.extra + 1 }); this.toastMsg('Entité créée'); },
+      statusText: s.playing ? 'EN JEU' : 'PRÊT', stColor: s.playing ? '#3FBF9F' : '#A3B0B6',
+      entCount: all.length
+    };
+  }
+}
+</script>
+</body>
+</html>

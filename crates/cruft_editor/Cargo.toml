@@ -1,0 +1,17 @@
+[package]
+name = "cruft_editor"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+bevy = { workspace = true, features = ["3d", "bevy_winit", "default_font", "multi_threaded", "x11", "png", "tonemapping_luts"] }
+cruft_core.workspace = true
+cruft_scene.workspace = true
+cruft_ui.workspace = true
+cruft_mcp.workspace = true
+
+[lints]
+workspace = true
+

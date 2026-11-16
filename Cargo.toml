@@ -1,0 +1,25 @@
+[workspace]
+members = ["crates/cruft_core", "crates/cruft_scene", "crates/cruft_ui", "crates/cruft_mcp", "crates/cruft_editor"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97.1"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+bevy = { version = "0.20.0", default-features = false, features = ["std", "bevy_scene", "serialize"] }
+ron = "0.12"
+serde = "1"
+cruft_core = { path = "crates/cruft_core" }
+cruft_scene = { path = "crates/cruft_scene" }
+cruft_ui = { path = "crates/cruft_ui" }
+cruft_mcp = { path = "crates/cruft_mcp" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = "warn"
+

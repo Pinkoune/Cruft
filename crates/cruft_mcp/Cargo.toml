@@ -1,0 +1,23 @@
+[package]
+name = "cruft_mcp"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+bevy = { workspace = true, features = ["bevy_render", "png"] }
+cruft_core.workspace = true
+cruft_scene.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json = "1"
+crossbeam-channel = "0.5"
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "time", "net", "io-std"] }
+rmcp = { version = "3.10", features = ["server", "transport-io", "transport-streamable-http-server"] }
+axum = "0.8"
+base64 = "0.22"
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[lints]
+workspace = true
+
